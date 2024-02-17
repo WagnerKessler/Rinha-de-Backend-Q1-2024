@@ -1,0 +1,6 @@
+@Rinha_de_Backend_Q1_2024_HostAddress = http://localhost:5224
+
+GET {{Rinha_de_Backend_Q1_2024_HostAddress}}/Clientes
+Accept: application/json
+
+###
