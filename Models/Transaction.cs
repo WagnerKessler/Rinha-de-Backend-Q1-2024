@@ -6,7 +6,6 @@ namespace Rinha_de_Backend_Q1_2024.Models
     // Input passed by the user to create a new transaction.
     public class TransactionInputModel
     {
-        // JSON Payload on POST.
         [JsonPropertyName("valor")]
         public int Amount { get; set; }
         [JsonPropertyName("tipo")]
@@ -19,8 +18,6 @@ namespace Rinha_de_Backend_Q1_2024.Models
     // Class defining a model for the response of a transaction.
     public class TransactionResponseModel
     {
-        // Properties
-        // JSON Property names added for the POST return.
         [JsonPropertyName("limite")]
         public int Limit { get; set; }
 
@@ -31,13 +28,6 @@ namespace Rinha_de_Backend_Q1_2024.Models
     // Class defining a model for transactions
     public class Transaction
     {
-        // Properties
-        [JsonIgnore]
-        public int Id { get; set; }
-
-        [JsonIgnore]
-        public int CustomerId { get; set; }
-
         [JsonPropertyName("valor")]
         public int Amount { get; set; }
 
@@ -51,6 +41,4 @@ namespace Rinha_de_Backend_Q1_2024.Models
         [JsonPropertyName("realizada_em")]
         public DateTime? DateTime { get; set; }
     }
-
-
 }

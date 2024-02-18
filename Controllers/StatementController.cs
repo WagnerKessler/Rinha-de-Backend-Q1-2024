@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 using Rinha_de_Backend_Q1_2024.Models;
-using Rinha_de_Backend_Q1_2024.Services;
+using System.Data;
 
 namespace Rinha_de_Backend_Q1_2024.Controllers
 {
@@ -9,42 +10,109 @@ namespace Rinha_de_Backend_Q1_2024.Controllers
     [Route("clientes/{id}/extrato")]
     public class StatementController : ControllerBase
     {
+        private readonly IDbConnection _connection;
 
-
-        // SET DB CONTEXT FOR CONTROLLER
-        private readonly RinhanDbContext _dbContext;
-        public StatementController(RinhanDbContext dbContext)
+        public StatementController(IConfiguration configuration)
         {
-            _dbContext = dbContext;
+            var connectionString = configuration.GetValue<string>("DBSettings:ConnectionString");
+            _connection = new NpgsqlConnection(connectionString);
+            ((NpgsqlConnection)_connection).OpenAsync().Wait();
         }
 
         [HttpGet]
         public async Task<ActionResult<Statement>> GetStatement(int id)
         {
-
-            Customer? ExistingCustomer = await _dbContext.Customers.FindAsync(id);
-
-            if (ExistingCustomer == null)
+            try
             {
-                return NotFound();
+                var existingCustomer = await GetCustomerByIdAsync(id);
+
+                if (existingCustomer == null)
+                {
+                    return NotFound();
+                }
+
+                var statement = new Statement();
+                var balance = new Balance();
+
+                var commandText = "SELECT \"Amount\", \"Type\", \"Description\", \"DateTime\" FROM public.\"Transactions\" WHERE \"CustomerId\" = @CustomerId ORDER BY \"DateTime\" DESC LIMIT 10";
+                var parameters = new NpgsqlParameter("@CustomerId", NpgsqlDbType.Integer) { Value = existingCustomer.Id };
+
+                using (var command = new NpgsqlCommand(commandText, (NpgsqlConnection)_connection))
+                {
+                    command.Parameters.Add(parameters);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var transaction = new Transaction
+                            {
+                                Amount = reader.GetInt32(0),
+                                Type = reader.GetChar(1),
+                                Description = reader.GetString(2),
+                                DateTime = reader.GetDateTime(3)
+                            };
+
+                            statement.BankStatement ??= new List<Transaction>();
+                            statement.BankStatement.Add(transaction);
+                        }
+                    }
+                }
+
+                balance.Total = existingCustomer.Balance;
+                balance.Limit = existingCustomer.Limit;
+                statement.Balance = balance;
+
+                return Ok(statement);
+            }
+            catch
+            {
+                return StatusCode(500, "Failed to retrieve statement");
+            }
+        }
+
+        private async Task<Customer?> GetCustomerByIdAsync(int id)
+        {
+            var commandText = "SELECT * FROM public.\"Customers\" WHERE \"Id\" = @Id";
+            var parameters = new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = id };
+
+            using (var command = new NpgsqlCommand(commandText, (NpgsqlConnection)_connection))
+            {
+                command.Parameters.Add(parameters);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        return new Customer
+                        {
+                            Id = reader.GetInt32(0),
+                            Limit = reader.GetInt32(1),
+                            Balance = reader.GetInt32(2)
+                        };
+                    }
+                }
             }
 
-            var Statement = new Statement();
-            var Balance = new Balance();
+            return null;
+        }
 
-            // Get the transactions from the database.
-            Statement.BankStatement = await _dbContext.Transactions
-                .Where(t => t.CustomerId == ExistingCustomer.Id)
-                .OrderByDescending(t => t.DateTime)
-                .Take(10)
-                .ToListAsync();
+        // Dispose method to ensure proper cleanup
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-            Balance.Total = ExistingCustomer.Balance;
-            Balance.Limit = ExistingCustomer.Limit;
-            Statement.Balance = Balance;
-
-            return Ok(Statement);
-
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_connection is NpgsqlConnection npgsqlConnection)
+                {
+                    npgsqlConnection.Dispose();
+                }
+            }
         }
     }
 }
