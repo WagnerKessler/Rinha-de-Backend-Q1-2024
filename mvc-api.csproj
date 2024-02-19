@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PublishTrimmed>false</PublishTrimmed>
+    <TrimMode>full</TrimMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Rinha_de_Backend_Q1_2024</RootNamespace>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -12,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
   </ItemGroup>
 
 </Project>
