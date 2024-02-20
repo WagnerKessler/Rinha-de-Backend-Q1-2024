@@ -9,16 +9,10 @@ namespace Rinha_de_Backend_Q1_2024.Services
         Task<Statement?> GetStatementForCustomerAsync(int customerId);
     }
 
-    public class StatementService : IStatementService
+    public class StatementService(NpgsqlConnection connection, ICustomerService customerService) : IStatementService
     {
-        private readonly NpgsqlConnection _connection;
-        private readonly ICustomerService _customerService;
-
-        public StatementService(NpgsqlConnection connection, ICustomerService customerService)
-        {
-            _connection = connection;
-            _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
-        }
+        private readonly NpgsqlConnection _connection = connection;
+        private readonly ICustomerService _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
 
         // Retrieve the statement for a given customer
         public async Task<Statement?> GetStatementForCustomerAsync(int customerId)

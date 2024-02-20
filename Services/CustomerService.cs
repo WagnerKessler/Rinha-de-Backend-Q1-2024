@@ -11,14 +11,9 @@ namespace Rinha_de_Backend_Q1_2024.Services
         Task<IResult> HandleCustomerCreationAsync(Customer newCustomer);
     }
 
-    public class CustomerService : ICustomerService
+    public class CustomerService(NpgsqlConnection connection) : ICustomerService
     {
-        private readonly NpgsqlConnection _connection;
-
-        public CustomerService(NpgsqlConnection connection)
-        {
-            _connection = connection;
-        }
+        private readonly NpgsqlConnection _connection = connection;
 
         // Retrieve a particular customer based on their ID
         public async Task<Customer?> GetCustomerByIdAsync(int id)
@@ -105,9 +100,6 @@ namespace Rinha_de_Backend_Q1_2024.Services
 
             return Results.BadRequest("Failed to create customer");
         }
-
-
-
 
     }
 }

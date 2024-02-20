@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using Rinha_de_Backend_Q1_2024.Models;
 using Rinha_de_Backend_Q1_2024.Services;
@@ -19,6 +18,10 @@ namespace Rinha_de_Backend_Q1_2024
             builder.Services.AddSingleton<ITransactionService, TransactionService>();
             builder.Services.AddSingleton<IStatementService, StatementService>();
             builder.Services.AddSingleton<NpgsqlConnection>(_ => new NpgsqlConnection(connectionString));
+            builder.Services.ConfigureHttpJsonOptions(options =>
+            {
+                options.SerializerOptions.TypeInfoResolverChain.Insert(0, SerializerContext.Default);
+            });
 
             // Build the application
             var app = builder.Build();
@@ -46,7 +49,7 @@ namespace Rinha_de_Backend_Q1_2024
                 var customers = await customerService.GetAllCustomersAsync();
 
                 // Return OK with the list of customers (or NoContent if empty)
-                return customers.Any() ? Results.Ok(customers) : Results.NoContent();
+                return customers.Count != 0 ? Results.Ok(customers) : Results.NoContent();
             }).Produces<Customer[]>();
 
             // ROUTE - Get a customer by ID
@@ -76,7 +79,7 @@ namespace Rinha_de_Backend_Q1_2024
             /********* TRANSACTIONS *********/
 
             // ROUTE - Create new transaction for a customer
-            app.MapPost("/clientes/{id}/transacoes", async (int id, [FromBody] TransactionInputModel transactionInput) =>
+            app.MapPost("/clientes/{id}/transacoes", async (int id, TransactionInputModel transactionInput) =>
             {
                 // Call the HandleTransactionAsync method from the service
                 return await transactionService.HandleTransactionAsync(id, transactionInput);

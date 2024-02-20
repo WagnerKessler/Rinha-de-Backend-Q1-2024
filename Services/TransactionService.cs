@@ -1,6 +1,5 @@
 ﻿using Npgsql;
 using Rinha_de_Backend_Q1_2024.Models;
-using System.Data.Common;
 
 namespace Rinha_de_Backend_Q1_2024.Services
 {
@@ -10,16 +9,10 @@ namespace Rinha_de_Backend_Q1_2024.Services
         Task<IResult> HandleTransactionAsync(int customerId, TransactionInputModel transactionInput);
     }
 
-    public class TransactionService : ITransactionService
+    public class TransactionService(NpgsqlConnection connection, ICustomerService customerService) : ITransactionService
     {
-        private readonly NpgsqlConnection _connection;
-        private readonly ICustomerService _customerService;
-
-        public TransactionService(NpgsqlConnection connection, ICustomerService customerService)
-        {
-            _connection = connection;
-            _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
-        }
+        private readonly NpgsqlConnection _connection = connection;
+        private readonly ICustomerService _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
 
         // Validate transaction payload
         private static bool IsValidTransactionInput(TransactionInputModel transactionInput)
@@ -46,11 +39,6 @@ namespace Rinha_de_Backend_Q1_2024.Services
                 return Results.BadRequest("Invalid request payload");
             }
 
-            if (transactionInput.Type == 'd' && (existingCustomer.Balance - transactionInput.Amount) < -existingCustomer.Limit)
-            {
-                return Results.UnprocessableEntity("Debit transaction would exceed limit");
-            }
-
             if (transactionInput.Type == 'c')
             {
                 existingCustomer.Balance += transactionInput.Amount;
@@ -61,7 +49,7 @@ namespace Rinha_de_Backend_Q1_2024.Services
                 {
                     return Results.UnprocessableEntity("Debit transaction would exceed limit");
                 }
-                existingCustomer.Balance -= transactionInput.Amount;
+                else { existingCustomer.Balance -= transactionInput.Amount; }
             }
 
             using var transaction = _connection.BeginTransaction();
@@ -114,8 +102,5 @@ namespace Rinha_de_Backend_Q1_2024.Services
             }
         }
 
-
-
     }
 }
-
