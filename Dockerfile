@@ -8,17 +8,17 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["mvc-api.csproj", "."]
-RUN dotnet restore "./mvc-api.csproj"
+COPY ["minimal-api.csproj", "."]
+RUN dotnet restore "./minimal-api.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "./mvc-api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./minimal-api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./mvc-api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./minimal-api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true 
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "mvc-api.dll"]
+ENTRYPOINT ["dotnet", "minimal-api.dll"]
