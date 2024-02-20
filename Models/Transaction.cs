@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Rinha_de_Backend_Q1_2024.Models
@@ -11,7 +10,6 @@ namespace Rinha_de_Backend_Q1_2024.Models
         [JsonPropertyName("tipo")]
         public char Type { get; set; }
         [JsonPropertyName("descricao")]
-        [MaxLength(10)]
         public string? Description { get; set; }
     }
 
@@ -35,7 +33,6 @@ namespace Rinha_de_Backend_Q1_2024.Models
         public char Type { get; set; }
 
         [JsonPropertyName("descricao")]
-        [MaxLength(10)]
         public string? Description { get; set; }
 
         [JsonPropertyName("realizada_em")]
