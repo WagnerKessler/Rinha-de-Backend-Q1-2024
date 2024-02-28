@@ -27,10 +27,10 @@ namespace Rinha_de_Backend_Q1_2024.Models
     public class Transaction
     {
         [JsonPropertyName("valor")]
-        public int Amount { get; set; }
+        public int? Amount { get; set; }
 
         [JsonPropertyName("tipo")]
-        public char Type { get; set; }
+        public char? Type { get; set; }
 
         [JsonPropertyName("descricao")]
         public string? Description { get; set; }

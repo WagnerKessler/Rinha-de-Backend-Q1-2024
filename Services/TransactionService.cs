@@ -9,10 +9,16 @@ namespace Rinha_de_Backend_Q1_2024.Services
         Task<IResult> HandleTransactionAsync(int customerId, TransactionInputModel transactionInput);
     }
 
-    public class TransactionService(NpgsqlConnection connection, ICustomerService customerService) : ITransactionService
+    public class TransactionService : ITransactionService
     {
-        private readonly NpgsqlConnection _connection = connection;
-        private readonly ICustomerService _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
+        private readonly string _connectionString;
+        private readonly ICustomerService _customerService;
+
+        public TransactionService(string connectionString, ICustomerService customerService)
+        {
+            _connectionString = connectionString;
+            _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
+        }
 
         // Validate transaction payload
         private static bool IsValidTransactionInput(TransactionInputModel transactionInput)
@@ -27,16 +33,19 @@ namespace Rinha_de_Backend_Q1_2024.Services
         // Handle transactions for a given customer
         public async Task<IResult> HandleTransactionAsync(int customerId, TransactionInputModel transactionInput)
         {
-            var existingCustomer = await _customerService.GetCustomerByIdAsync(customerId);
+            if (!IsValidTransactionInput(transactionInput))
+            {
+                return Results.UnprocessableEntity("Invalid request payload");
+            }
 
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var transaction = await connection.BeginTransactionAsync();
+
+            var existingCustomer = await _customerService.LockCustomerAndGetByIdAsync(customerId, connection, transaction);
             if (existingCustomer == null)
             {
                 return Results.NotFound();
-            }
-
-            if (!IsValidTransactionInput(transactionInput))
-            {
-                return Results.BadRequest("Invalid request payload");
             }
 
             if (transactionInput.Type == 'c')
@@ -52,42 +61,24 @@ namespace Rinha_de_Backend_Q1_2024.Services
                 else { existingCustomer.Balance -= transactionInput.Amount; }
             }
 
-            using var transaction = _connection.BeginTransaction();
+            var tableName = "Transactions_" + existingCustomer.Id;
+            var updateAndInsertCommandText = $"UPDATE public.\"Customers\" SET \"Balance\" = @Balance WHERE \"Id\" = @Id;" +
+                                             $"INSERT INTO public.\"{tableName}\" ( \"Amount\", \"Type\", \"Description\") VALUES (@Amount, @Type, @Description);";
+
             try
             {
-                var updateCustomerCommandText = "UPDATE public.\"Customers\" SET \"Balance\" = @Balance WHERE \"Id\" = @Id";
-                var updateCustomerParameters = new
+
+                using (var updateAndInsertCommand = new NpgsqlCommand(updateAndInsertCommandText, connection))
                 {
-                    Balance = existingCustomer.Balance,
-                    Id = existingCustomer.Id
-                };
+                    updateAndInsertCommand.Parameters.AddWithValue("@Balance", existingCustomer.Balance);
+                    updateAndInsertCommand.Parameters.AddWithValue("@Id", existingCustomer.Id);
+                    updateAndInsertCommand.Parameters.AddWithValue("@Amount", transactionInput.Amount);
+                    updateAndInsertCommand.Parameters.AddWithValue("@Type", transactionInput.Type);
+                    updateAndInsertCommand.Parameters.AddWithValue("@Description", transactionInput.Description!);
+                    await updateAndInsertCommand.ExecuteNonQueryAsync();
+                }
 
-                using var updateCommand = new NpgsqlCommand(updateCustomerCommandText, _connection);
-                updateCommand.Parameters.AddWithValue("@Balance", existingCustomer.Balance);
-                updateCommand.Parameters.AddWithValue("@Id", existingCustomer.Id);
-
-                await updateCommand.ExecuteNonQueryAsync();
-
-                var insertTransactionCommandText = "INSERT INTO public.\"Transactions\" (\"CustomerId\", \"Amount\", \"Type\", \"Description\", \"DateTime\") VALUES (@CustomerId, @Amount, @Type, @Description, @DateTime)";
-                var insertTransactionParameters = new
-                {
-                    CustomerId = existingCustomer.Id,
-                    Amount = transactionInput.Amount,
-                    Type = transactionInput.Type,
-                    Description = transactionInput.Description!,
-                    DateTime = DateTime.UtcNow
-                };
-
-                using var insertCommand = new NpgsqlCommand(insertTransactionCommandText, _connection);
-                insertCommand.Parameters.AddWithValue("@CustomerId", existingCustomer.Id);
-                insertCommand.Parameters.AddWithValue("@Amount", transactionInput.Amount);
-                insertCommand.Parameters.AddWithValue("@Type", transactionInput.Type);
-                insertCommand.Parameters.AddWithValue("@Description", transactionInput.Description!);
-                insertCommand.Parameters.AddWithValue("@DateTime", DateTime.UtcNow);
-
-                await insertCommand.ExecuteNonQueryAsync();
-
-                transaction.Commit();
+                await transaction.CommitAsync();
 
                 return Results.Ok(new TransactionResponseModel
                 {
@@ -97,10 +88,9 @@ namespace Rinha_de_Backend_Q1_2024.Services
             }
             catch
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 return Results.StatusCode(500);
             }
         }
-
     }
 }
