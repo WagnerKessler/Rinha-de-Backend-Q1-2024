@@ -8,10 +8,12 @@
 Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava interessado em validar a forma como ele gerencia row level locking por padrão, diferente do MVCC do Postgres, e o efeito que isso teria junto de um código otimizado, assim como validar seu baixo tempo em OLTP. Ao mesmo tempo, estava contemplando um Envoy no load balancer também por aguentar um paralelismo melhor do que o NGINX, ao menos em benchmarks. Mas a rota do "free and open source" falou mais alto e dropei o Informix, eventualmente desisti do envoy ao ver que o nginx não seria gargalo e não teria diferença significativa de performance. Desta forma, mantive a escolha bem vanilla com o postgresql e o nginx que a maioria tem usado e conhece bem, porém focando na otimização dos recursos para tentar uma performance razoável e brincar entre os monstros da rinha. 
 
 **Kestrel montado no postgres :)**
+<br>
 ![ASP.NET and Postgres](https://th.bing.com/th/id/OIG2.Q21F.uNfeHTS7EhCTSMc)
 
 ---
 **Referência para otimizações no banco...**
+<br>
 ![XGH](https://atitudereflexiva.files.wordpress.com/2015/10/xgh-e1330433625262.jpg)
 
 
