@@ -2,9 +2,9 @@
 
 # Use este script para executar testes locais
 
-RESULTS_WORKSPACE="$(pwd)/load-test/user-files/results"
+RESULTS_WORKSPACE="$(pwd)/Load-test/user-files/results"
 GATLING_BIN_DIR=/opt/gatling/bin
-GATLING_WORKSPACE="$(pwd)/load-test/user-files"
+GATLING_WORKSPACE="$(pwd)/Load-test/user-files"
 
 runGatling() {
     sh $GATLING_BIN_DIR/gatling.sh -rm local -s RinhaBackendCrebitosSimulation \
