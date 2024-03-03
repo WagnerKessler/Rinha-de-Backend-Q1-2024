@@ -19,5 +19,5 @@ API: [WagnerKessler/Rinha-de-Backend-Q1-2024](https://github.com/WagnerKessler/R
 <br>
 Contato: [LinkedIn](https://linkedin.com/in/wkstumpf)
 
-Kestrel entrando montado no postgres para a rinha... :)
+Kestrel entrando montado no postgres e acompanhado de muito go horse para a rinha... :)
 ![ASP.NET riding Postgres, paired by XGH](https://th.bing.com/th/id/OIG2.bRohJEk0k3Ex8OF4Fp5O)
