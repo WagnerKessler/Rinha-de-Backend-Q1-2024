@@ -49,7 +49,7 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
 **Volume original dos testes para a rinha:**
 ========================
 
-*        debitos.inject(
+        debitos.inject(
           rampUsersPerSec(1).to(220).during(2.minutes),
           constantUsersPerSec(220).during(2.minutes)
         ),
@@ -59,14 +59,14 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
         ),
         extratos.inject(
           rampUsersPerSec(1).to(10).during(2.minutes),
-          constantUsersPerSec(10).during(2.minutes)*
+          constantUsersPerSec(10).during(2.minutes)
 
 ![Volume Original](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/Original.png)          
 
 **2x o volume:**
 ========================
 
-*        debitos.inject(
+        debitos.inject(
           rampUsersPerSec(1).to(440).during(2.minutes),
           constantUsersPerSec(440).during(2.minutes)
         ),
@@ -76,14 +76,14 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
         ),
         extratos.inject(
           rampUsersPerSec(1).to(20).during(2.minutes),
-          constantUsersPerSec(20).during(2.minutes)*
+          constantUsersPerSec(20).during(2.minutes)
 
 ![20 minutos](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/2x-volume.png)
 
 **3x o volume:**
 ========================
 
-*        debitos.inject(
+        debitos.inject(
           rampUsersPerSec(1).to(660).during(2.minutes),
           constantUsersPerSec(660).during(2.minutes)
         ),
@@ -93,14 +93,14 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
         ),
         extratos.inject(
           rampUsersPerSec(1).to(30).during(2.minutes),
-          constantUsersPerSec(30).during(2.minutes)*
+          constantUsersPerSec(30).during(2.minutes)
 
 ![20 minutos](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/3x-volume.png)
 
 **3x o volume, com o galo-cinza rinheiro sofrendo pancada por 20 minutos:**
 ========================
 
-*        debitos.inject(
+        debitos.inject(
           rampUsersPerSec(1).to(660).during(5.minutes),
           constantUsersPerSec(660).during(15.minutes)
         ),
@@ -110,6 +110,6 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
         ),
         extratos.inject(
           rampUsersPerSec(1).to(30).during(5.minutes),
-          constantUsersPerSec(30).during(15.minutes)*
+          constantUsersPerSec(30).during(15.minutes)
 
 ![20 minutos](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/20-mins.png)
