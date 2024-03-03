@@ -1,5 +1,4 @@
 ﻿using Npgsql;
-using NpgsqlTypes;
 using Rinha_de_Backend_Q1_2024.Models;
 
 namespace Rinha_de_Backend_Q1_2024.Services
@@ -9,12 +8,17 @@ namespace Rinha_de_Backend_Q1_2024.Services
         Task<Statement?> GetStatementForCustomerAsync(int customerId);
     }
 
-    public class StatementService(NpgsqlConnection connection, ICustomerService customerService) : IStatementService
+    public class StatementService : IStatementService
     {
-        private readonly NpgsqlConnection _connection = connection;
-        private readonly ICustomerService _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
+        private readonly string _connectionString;
+        private readonly ICustomerService _customerService;
 
-        // Retrieve the statement for a given customer
+        public StatementService(string connectionString, ICustomerService customerService)
+        {
+            _connectionString = connectionString;
+            _customerService = customerService ?? throw new ArgumentNullException(nameof(customerService));
+        }
+
         public async Task<Statement?> GetStatementForCustomerAsync(int customerId)
         {
             var existingCustomer = await _customerService.GetCustomerByIdAsync(customerId);
@@ -24,15 +28,16 @@ namespace Rinha_de_Backend_Q1_2024.Services
                 return null;
             }
 
-            var statement = new Statement();
+            var statement = new Statement { BankStatement = new List<Transaction>() };
+            var tableName = "Transactions_" + existingCustomer.Id;
+            var commandText = $"SELECT \"Amount\", \"Type\", \"Description\", \"DateTime\" FROM public.\"{tableName}\" ORDER BY \"Id\" DESC LIMIT 10";
 
-            var commandText = "SELECT \"Amount\", \"Type\", \"Description\", \"DateTime\" FROM public.\"Transactions\" WHERE \"CustomerId\" = @CustomerId ORDER BY \"DateTime\" DESC LIMIT 10";
-            var parameters = new NpgsqlParameter("@CustomerId", NpgsqlDbType.Integer) { Value = existingCustomer.Id };
 
-            using (var command = new NpgsqlCommand(commandText, _connection))
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(commandText, connection))
             {
-                command.Parameters.Add(parameters);
-
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
@@ -44,8 +49,6 @@ namespace Rinha_de_Backend_Q1_2024.Services
                             Description = reader.GetString(2),
                             DateTime = reader.GetDateTime(3)
                         };
-
-                        statement.BankStatement ??= new List<Transaction>();
                         statement.BankStatement.Add(transaction);
                     }
                 }
@@ -61,6 +64,5 @@ namespace Rinha_de_Backend_Q1_2024.Services
 
             return statement;
         }
-
     }
 }

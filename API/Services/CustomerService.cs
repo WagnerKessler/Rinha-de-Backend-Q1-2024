@@ -1,5 +1,4 @@
 ﻿using Npgsql;
-using NpgsqlTypes;
 using Rinha_de_Backend_Q1_2024.Models;
 
 namespace Rinha_de_Backend_Q1_2024.Services
@@ -7,23 +6,30 @@ namespace Rinha_de_Backend_Q1_2024.Services
     public interface ICustomerService
     {
         Task<Customer?> GetCustomerByIdAsync(int id);
+        Task<Customer?> LockCustomerAndGetByIdAsync(int id, NpgsqlConnection connection, NpgsqlTransaction transaction);
         Task<List<Customer>> GetAllCustomersAsync();
         Task<IResult> HandleCustomerCreationAsync(Customer newCustomer);
     }
 
-    public class CustomerService(NpgsqlConnection connection) : ICustomerService
+    public class CustomerService : ICustomerService
     {
-        private readonly NpgsqlConnection _connection = connection;
+        private readonly string _connectionString;
 
-        // Retrieve a particular customer based on their ID
+        public CustomerService(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
         public async Task<Customer?> GetCustomerByIdAsync(int id)
         {
-            var commandText = "SELECT * FROM public.\"Customers\" WHERE \"Id\" = @Id";
-            var parameters = new NpgsqlParameter("@Id", NpgsqlDbType.Integer) { Value = id };
+            var commandText = "SELECT \"Id\", \"Limit\", \"Balance\" FROM public.\"Customers\" WHERE \"Id\" = @Id";
 
-            using (var command = new NpgsqlCommand(commandText, _connection))
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(commandText, connection))
             {
-                command.Parameters.Add(parameters);
+                command.Parameters.AddWithValue("@Id", id);
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
@@ -41,13 +47,39 @@ namespace Rinha_de_Backend_Q1_2024.Services
             return null;
         }
 
-        // Retrieve all customers
+        public async Task<Customer?> LockCustomerAndGetByIdAsync(int id, NpgsqlConnection connection, NpgsqlTransaction transaction)
+        {
+            var commandText = "SELECT \"Id\", \"Limit\", \"Balance\" FROM public.\"Customers\" WHERE \"Id\" = @Id FOR UPDATE";
+
+            using (var command = new NpgsqlCommand(commandText, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@Id", id);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        return new Customer
+                        {
+                            Id = reader.GetInt32(0),
+                            Limit = reader.GetInt32(1),
+                            Balance = reader.GetInt32(2)
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+
         public async Task<List<Customer>> GetAllCustomersAsync()
         {
-            var commandText = "SELECT * FROM public.\"Customers\"";
+            var commandText = "SELECT \"Id\", \"Limit\", \"Balance\" FROM public.\"Customers\"";
             var customers = new List<Customer>();
 
-            using (var command = new NpgsqlCommand(commandText, _connection))
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(commandText, connection))
             using (var reader = await command.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
@@ -62,11 +94,9 @@ namespace Rinha_de_Backend_Q1_2024.Services
                     customers.Add(customer);
                 }
             }
-
             return customers;
         }
 
-        // Create a new customer
         public async Task<IResult> HandleCustomerCreationAsync(Customer newCustomer)
         {
             if (newCustomer == null)
@@ -76,7 +106,10 @@ namespace Rinha_de_Backend_Q1_2024.Services
 
             var commandText = "INSERT INTO public.\"Customers\" (\"Id\", \"Limit\", \"Balance\") VALUES (@Id, @Limit, @Balance) RETURNING *";
 
-            using (var command = new NpgsqlCommand(commandText, _connection))
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(commandText, connection))
             {
                 command.Parameters.AddWithValue("@Id", newCustomer.Id);
                 command.Parameters.AddWithValue("@Limit", newCustomer.Limit);
@@ -100,6 +133,5 @@ namespace Rinha_de_Backend_Q1_2024.Services
 
             return Results.BadRequest("Failed to create customer");
         }
-
     }
 }

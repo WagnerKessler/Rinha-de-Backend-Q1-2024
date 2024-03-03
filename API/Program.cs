@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Npgsql;
 using Rinha_de_Backend_Q1_2024.Models;
 using Rinha_de_Backend_Q1_2024.Services;
@@ -11,24 +12,39 @@ namespace Rinha_de_Backend_Q1_2024
         {
             // General variables and options for the builder
             var builder = WebApplication.CreateSlimBuilder(args);
-            var connectionString = builder.Configuration.GetValue<string>("DBSettings:ConnectionString");
+            var connectionString = builder.Configuration.GetValue<string>("DBSettings:ConnectionStringUnix");
+
+            try // Try to connect using Unix domain socket
+            {
+                using var connection = new NpgsqlConnection(connectionString);
+                connection.Open(); // If the connection is successful, close it and use the Unix domain socket
+            }
+            catch
+            {
+                connectionString = builder.Configuration.GetValue<string>("DBSettings:ConnectionStringTCP"); // If the connection failed, fall back to TCP/IP
+            }
 
             // Register the services that will handle the required logic
-            builder.Services.AddSingleton<ICustomerService, CustomerService>();
-            builder.Services.AddSingleton<ITransactionService, TransactionService>();
-            builder.Services.AddSingleton<IStatementService, StatementService>();
-            builder.Services.AddSingleton<NpgsqlConnection>(_ => new NpgsqlConnection(connectionString));
+            builder.Services.AddSingleton<ICustomerService>(_ => new CustomerService(connectionString!));
+            builder.Services.AddSingleton<ITransactionService>(sp => new TransactionService(connectionString!, sp.GetRequiredService<ICustomerService>()));
+            builder.Services.AddSingleton<IStatementService>(sp => new StatementService(connectionString!, sp.GetRequiredService<ICustomerService>()));
             builder.Services.ConfigureHttpJsonOptions(options =>
             {
                 options.SerializerOptions.TypeInfoResolverChain.Insert(0, SerializerContext.Default);
             });
 
+            // Configure Kestrel to listen on Unix domain socket and TCP/IP socket
+            string instanceId = Environment.GetEnvironmentVariable("INSTANCE_ID") ?? "1";
+            string unixSocketPath = $"/tmp/api_{instanceId}.sock";
+            int tcpPort = 8080 + int.Parse(instanceId);
+            builder.Services.Configure<KestrelServerOptions>(options =>
+            {
+                options.ListenUnixSocket(unixSocketPath);
+                options.ListenAnyIP(tcpPort);
+            });
+
             // Build the application
             var app = builder.Build();
-
-            // Open SQL Connection (Pool is automatically managed by Npgsql)
-            var connection = app.Services.GetRequiredService<NpgsqlConnection>();
-            connection.OpenAsync().Wait();
 
             // Create the services
             var customerService = app.Services.GetRequiredService<ICustomerService>();
