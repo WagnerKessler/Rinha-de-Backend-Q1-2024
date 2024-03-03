@@ -10,8 +10,8 @@ Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava
 - API: .NET 8 com Native AOT* 
 - Metolodogia: XGH
 - Design Principle: KISS
-
-* Após intimações de um amigo ~~neandertal~~ javeiro, fazendo PR para a rinha, com "CADÊ O SEU .NET AGORA?!". Bem, tá aqui seu ~~animal~~ lindo.
+<br><br>
+"* Após intimações de um amigo ~~neandertal~~ javeiro, fazendo PR para a rinha, com "CADÊ O SEU .NET AGORA?!". Bem, tá aqui seu ~~animal~~ lindo."
 
 Para detalhes sobre a evolução do projeto e resultados, favor verificar o README no repositório da API.
 
