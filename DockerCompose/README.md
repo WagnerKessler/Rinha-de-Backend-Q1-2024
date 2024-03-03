@@ -11,7 +11,7 @@ Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava
 - Metolodogia: XGH
 - Design Principle: KISS
 <br><br>
-* Após intimações de um amigo ~~neandertal~~ javeiro, fazendo PR para a rinha, com "CADÊ O SEU .NET AGORA?!". Bem, tá aqui seu ~~animal~~ lindo.
+\* Após intimações de um amigo ~~neandertal~~ javeiro, fazendo PR para a rinha, com "CADÊ O SEU .NET AGORA?!". Bem, tá aqui seu ~~animal~~ lindo.
 
 Para detalhes sobre a evolução do projeto e resultados, favor verificar o README no repositório da API.
 
