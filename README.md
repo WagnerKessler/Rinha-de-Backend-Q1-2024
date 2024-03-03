@@ -1,6 +1,4 @@
-# Rinha-de-Backend-Q1-2024
-
-**<center><i>API em .NET 8 com Native AOT.</i></center>**
+# Rinha-de-Backend-Q1-2024 -- **<i>API em .NET 8 com Native AOT.
 
 ---
 **Escopo da solução:**
@@ -11,7 +9,6 @@ Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava
 <br>
 ![ASP.NET and Postgres](https://th.bing.com/th/id/OIG2.Q21F.uNfeHTS7EhCTSMc)
 
----
 **Referência para otimizações no banco...**
 <br>
 ![XGH](https://atitudereflexiva.files.wordpress.com/2015/10/xgh-e1330433625262.jpg)
