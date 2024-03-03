@@ -1,4 +1,4 @@
-# Rinha-de-Backend-Q1-2024 -- **<i>API em .NET 8 com Native AOT.
+# Rinha-de-Backend-Q1-2024 -- API em .NET 8 com Native AOT.
 
 ---
 **Escopo da solução:**
