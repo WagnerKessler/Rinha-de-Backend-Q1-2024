@@ -16,7 +16,7 @@ Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava
 Para detalhes sobre a evolução do projeto e resultados, favor verificar o README no repositório da API.
 
 API: [WagnerKessler/Rinha-de-Backend-Q1-2024](https://github.com/WagnerKessler/Rinha-de-Backend-Q1-2024)
-Contato: [LinkedIn](https://br.linkedin.com/in/wkstumpf) / [e-mail](wagner@kessler.dev)
+Contato: [LinkedIn](https://br.linkedin.com/in/wkstumpf)
 
 
 ![ASP.NET riding Postgres, paired by XGH](https://th.bing.com/th/id/OIG2.bRohJEk0k3Ex8OF4Fp5O)
