@@ -7,8 +7,11 @@
 ========================
 Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava interessado em validar a forma como ele gerencia row level locking por padrão, diferente do MVCC do Postgres, e o efeito que isso teria junto de um código otimizado, assim como validar seu baixo tempo em OLTP. Ao mesmo tempo, estava contemplando um Envoy no load balancer também por aguentar um paralelismo melhor do que o NGINX, ao menos em benchmarks. Mas a rota do "free and open source" falou mais alto e dropei o Informix, eventualmente desisti do envoy ao ver que o nginx não seria gargalo e não teria diferença significativa de performance. Desta forma, mantive a escolha bem vanilla com o postgresql e o nginx que a maioria tem usado e conhece bem, porém focando na otimização dos recursos para tentar uma performance razoável e brincar entre os monstros da rinha. 
 
+Kestrel montado no postgres :)
+![ASP.NET and Postgres](https://th.bing.com/th/id/OIG2.Q21F.uNfeHTS7EhCTSMc)
 
-![ASP.NET and Postgres](https://th.bing.com/th/id/OIG2.Q21F.uNfeHTS7EhCTSMc) ![XGH](https://atitudereflexiva.files.wordpress.com/2015/10/xgh-e1330433625262.jpg)
+Referência para otimizações no banco...
+![XGH](https://atitudereflexiva.files.wordpress.com/2015/10/xgh-e1330433625262.jpg)
 
 
 ---
@@ -55,10 +58,10 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
           rampUsersPerSec(1).to(10).during(2.minutes),
           constantUsersPerSec(10).during(2.minutes)*
 
-![Volume Original](https://github.com/WagnerKessler/Rinha-de-Backend-Q1-2024/blob/minimal-api/Images/Original.png?raw=true)          
+![Volume Original](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/Original.png)          
 
 **2x o volume:**
-        debitos.inject(
+*        debitos.inject(
           rampUsersPerSec(1).to(440).during(2.minutes),
           constantUsersPerSec(440).during(2.minutes)
         ),
@@ -68,12 +71,12 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
         ),
         extratos.inject(
           rampUsersPerSec(1).to(20).during(2.minutes),
-          constantUsersPerSec(20).during(2.minutes)
+          constantUsersPerSec(20).during(2.minutes)*
 
-![20 minutos](https://github.com/WagnerKessler/Rinha-de-Backend-Q1-2024/blob/minimal-api/Images/2x-volume.png?raw=true)
+![20 minutos](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/2x-volume.png)
 
 **3x o volume:**
-        debitos.inject(
+*        debitos.inject(
           rampUsersPerSec(1).to(660).during(2.minutes),
           constantUsersPerSec(660).during(2.minutes)
         ),
@@ -83,9 +86,9 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
         ),
         extratos.inject(
           rampUsersPerSec(1).to(30).during(2.minutes),
-          constantUsersPerSec(30).during(2.minutes)
+          constantUsersPerSec(30).during(2.minutes)*
 
-![20 minutos](https://github.com/WagnerKessler/Rinha-de-Backend-Q1-2024/blob/minimal-api/Images/3x-volume.png?raw=true)
+![20 minutos](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/3x-volume.png)
 
 **3x o volume, com o galo-cinza rinheiro sofrendo pancada por 20 minutos:**
 *        debitos.inject(
@@ -100,4 +103,4 @@ Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, p
           rampUsersPerSec(1).to(30).during(5.minutes),
           constantUsersPerSec(30).during(15.minutes)*
 
-![20 minutos](https://github.com/WagnerKessler/Rinha-de-Backend-Q1-2024/blob/minimal-api/Images/20-mins.png?raw=true)
+![20 minutos](https://raw.githubusercontent.com/WagnerKessler/Rinha-de-Backend-Q1-2024/minimal/Images/20-mins.png)
