@@ -40,7 +40,7 @@ Enquanto idealizava o projeto, pensei em colocar um Informix na base pois estava
     - Neste novo cenário, versão publicada do código, limite de 1.35 core testado começando com 0.25 core por instância da API e 0.85 no banco, até 0.375 por instância de API e 0.6 no banco (cenários ainda maiores e menores de CPU na API já haviam sido testados no 3x com a duração original e falhado). Aplicação ficou 100% livre de KOs de forma consistente com 0.3375 core na API e 0.675 no banco e 0.35 core na API e 0.65 no banco.
     - Testes de carga com longa execução e 3x o volume, comparando ambos os cenários válidos, p95 ficou levemente mais baixo com 0.35 core na API.
 
-Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, produção do readme com os aprendizados "\u2764", publicação do galo-cinza e entrada do mesmo na rinha via PR. 
+Por fim, feita organizaçao da estrutura de pastas do projeto para submissão, produção do readme com os aprendizados, publicação do galo-cinza e entrada do mesmo na rinha via PR. 
 
 ---
 **Testes & Resultados:**
